@@ -831,85 +831,171 @@
       const w = state.width;
       const h = state.height;
       const x = w * 0.5 + state.playerX * w * 0.28;
-      const y = h * 0.82;
-      const s = h * 0.16;
-      const lean = state.playerX * 0.16;
+      const groundY = h * 0.835;
+      const s = h * 0.155;
+      const lean = clamp(state.playerX * 0.035, -0.04, 0.04);
 
       ctx.save();
-      ctx.translate(x, y);
+      ctx.translate(x, groundY);
       ctx.rotate(lean);
 
-      // shadow
-      ctx.fillStyle = "rgba(0,0,0,0.38)";
+      // Soft road shadow
+      ctx.fillStyle = "rgba(0,0,0,0.45)";
       ctx.beginPath();
-      ctx.ellipse(0, s * 0.28, s * 0.72, s * 0.18, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, s * 0.30, s * 0.42, s * 0.16, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // wheels
-      ctx.fillStyle = "#080A12";
+      // Rear tyre, seen from behind
+      const tyreW = s * 0.23;
+      const tyreH = s * 0.72;
+      ctx.fillStyle = "#05060A";
       ctx.beginPath();
-      ctx.ellipse(-s * 0.28, s * 0.2, s * 0.18, s * 0.22, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(s * 0.28, s * 0.2, s * 0.18, s * 0.22, 0, 0, Math.PI * 2);
+      ctx.roundRect(-tyreW / 2, -s * 0.10, tyreW, tyreH, tyreW * 0.45);
       ctx.fill();
 
-      ctx.strokeStyle = "#F7F1DC";
+      // Tyre highlight
+      ctx.strokeStyle = "rgba(248,241,220,0.85)";
+      ctx.lineWidth = Math.max(2, s * 0.018);
+      ctx.beginPath();
+      ctx.roundRect(-tyreW * 0.38, -s * 0.04, tyreW * 0.76, tyreH * 0.82, tyreW * 0.35);
+      ctx.stroke();
+
+      // Rear fender
+      ctx.fillStyle = "#8E2026";
+      ctx.beginPath();
+      ctx.roundRect(-s * 0.18, -s * 0.28, s * 0.36, s * 0.32, s * 0.10);
+      ctx.fill();
+
+      // Tail light
+      ctx.fillStyle = "rgba(255, 64, 88, 0.95)";
+      ctx.fillRect(-s * 0.08, -s * 0.18, s * 0.16, s * 0.045);
+
+      // Exhausts
+      ctx.fillStyle = "#C7CAD4";
+      ctx.beginPath();
+      ctx.roundRect(-s * 0.31, s * 0.05, s * 0.12, s * 0.36, s * 0.04);
+      ctx.roundRect(s * 0.19, s * 0.05, s * 0.12, s * 0.36, s * 0.04);
+      ctx.fill();
+
+      ctx.fillStyle = "#384152";
+      ctx.fillRect(-s * 0.285, s * 0.32, s * 0.07, s * 0.10);
+      ctx.fillRect(s * 0.215, s * 0.32, s * 0.07, s * 0.10);
+
+      // Seat
+      ctx.fillStyle = "#090B12";
+      ctx.beginPath();
+      ctx.roundRect(-s * 0.20, -s * 0.54, s * 0.40, s * 0.18, s * 0.08);
+      ctx.fill();
+
+      // Fuel tank / rear body, symmetrical
+      const tankGradient = ctx.createLinearGradient(-s * 0.26, -s * 0.78, s * 0.26, -s * 0.38);
+      tankGradient.addColorStop(0, "#7E1820");
+      tankGradient.addColorStop(0.5, "#C22B31");
+      tankGradient.addColorStop(1, "#EE4A43");
+      ctx.fillStyle = tankGradient;
+      ctx.beginPath();
+      ctx.roundRect(-s * 0.29, -s * 0.78, s * 0.58, s * 0.34, s * 0.14);
+      ctx.fill();
+
+      // Tank stripe
+      ctx.fillStyle = "#FFD36A";
+      ctx.fillRect(-s * 0.055, -s * 0.75, s * 0.11, s * 0.26);
+
+      // Fork / frame lines
+      ctx.strokeStyle = "#E9EDF5";
       ctx.lineWidth = Math.max(2, s * 0.025);
       ctx.beginPath();
-      ctx.arc(-s * 0.28, s * 0.2, s * 0.13, 0, Math.PI * 2);
-      ctx.arc(s * 0.28, s * 0.2, s * 0.13, 0, Math.PI * 2);
+      ctx.moveTo(-s * 0.20, -s * 0.40);
+      ctx.lineTo(-s * 0.08, s * 0.13);
+      ctx.moveTo(s * 0.20, -s * 0.40);
+      ctx.lineTo(s * 0.08, s * 0.13);
       ctx.stroke();
 
-      // frame
-      ctx.strokeStyle = "#C7CAD4";
-      ctx.lineWidth = s * 0.055;
+      // Rider legs
+      ctx.strokeStyle = "#0E1524";
+      ctx.lineWidth = s * 0.12;
+      ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(-s * 0.36, s * 0.08);
-      ctx.lineTo(-s * 0.05, -s * 0.06);
-      ctx.lineTo(s * 0.33, s * 0.08);
-      ctx.moveTo(-s * 0.05, -s * 0.06);
-      ctx.lineTo(0, s * 0.18);
+      ctx.moveTo(-s * 0.12, -s * 0.72);
+      ctx.lineTo(-s * 0.25, -s * 0.26);
+      ctx.moveTo(s * 0.12, -s * 0.72);
+      ctx.lineTo(s * 0.25, -s * 0.26);
       ctx.stroke();
 
-      // tank
-      ctx.fillStyle = "#B02A2A";
+      // Rider jacket torso
+      const jacket = ctx.createLinearGradient(0, -s * 1.30, 0, -s * 0.70);
+      jacket.addColorStop(0, "#172033");
+      jacket.addColorStop(1, "#080B14");
+      ctx.fillStyle = jacket;
       ctx.beginPath();
-      ctx.roundRect(-s * 0.16, -s * 0.18, s * 0.42, s * 0.22, s * 0.08);
+      ctx.roundRect(-s * 0.18, -s * 1.23, s * 0.36, s * 0.54, s * 0.12);
       ctx.fill();
 
-      ctx.fillStyle = "#FFD36A";
-      ctx.fillRect(-s * 0.05, -s * 0.15, s * 0.18, s * 0.045);
-
-      // rider
+      // Shoulders
       ctx.fillStyle = "#111827";
       ctx.beginPath();
-      ctx.roundRect(-s * 0.06, -s * 0.45, s * 0.16, s * 0.34, s * 0.08);
+      ctx.roundRect(-s * 0.33, -s * 1.12, s * 0.66, s * 0.18, s * 0.09);
       ctx.fill();
 
-      ctx.fillStyle = "#F7CDA0";
+      // Arms to bars
+      ctx.strokeStyle = "#111827";
+      ctx.lineWidth = s * 0.075;
+      ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.arc(s * 0.03, -s * 0.54, s * 0.08, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(-s * 0.23, -s * 1.02);
+      ctx.lineTo(-s * 0.43, -s * 0.72);
+      ctx.moveTo(s * 0.23, -s * 1.02);
+      ctx.lineTo(s * 0.43, -s * 0.72);
+      ctx.stroke();
 
-      ctx.fillStyle = "#0A0B12";
+      // Handlebar
+      ctx.strokeStyle = "#DDE3EA";
+      ctx.lineWidth = s * 0.045;
       ctx.beginPath();
-      ctx.arc(s * 0.03, -s * 0.57, s * 0.09, Math.PI, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(-s * 0.50, -s * 0.72);
+      ctx.lineTo(-s * 0.18, -s * 0.70);
+      ctx.moveTo(s * 0.18, -s * 0.70);
+      ctx.lineTo(s * 0.50, -s * 0.72);
+      ctx.stroke();
 
-      // headlight
-      ctx.fillStyle = "rgba(255, 230, 142, 0.88)";
+      // Gloves
+      ctx.fillStyle = "#05060A";
       ctx.beginPath();
-      ctx.arc(s * 0.39, s * 0.02, s * 0.055, 0, Math.PI * 2);
+      ctx.arc(-s * 0.48, -s * 0.72, s * 0.055, 0, Math.PI * 2);
+      ctx.arc(s * 0.48, -s * 0.72, s * 0.055, 0, Math.PI * 2);
       ctx.fill();
 
-      // boost flame
+      // Helmet
+      const helmet = ctx.createRadialGradient(-s * 0.05, -s * 1.43, s * 0.02, 0, -s * 1.39, s * 0.22);
+      helmet.addColorStop(0, "#303A4D");
+      helmet.addColorStop(1, "#080A12");
+      ctx.fillStyle = helmet;
+      ctx.beginPath();
+      ctx.arc(0, -s * 1.42, s * 0.19, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Visor
+      ctx.fillStyle = "rgba(32,170,227,0.92)";
+      ctx.beginPath();
+      ctx.roundRect(-s * 0.12, -s * 1.47, s * 0.24, s * 0.055, s * 0.025);
+      ctx.fill();
+
+      // Rear light glow
+      ctx.fillStyle = "rgba(255, 63, 79, 0.18)";
+      ctx.beginPath();
+      ctx.ellipse(0, -s * 0.12, s * 0.24, s * 0.12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
       if (keys.has(" ") || touch.boost) {
-        ctx.fillStyle = "rgba(255, 94, 58, 0.86)";
+        const flame = ctx.createLinearGradient(0, s * 0.28, 0, s * 0.90);
+        flame.addColorStop(0, "rgba(255, 238, 120, 0.96)");
+        flame.addColorStop(0.45, "rgba(255, 94, 58, 0.88)");
+        flame.addColorStop(1, "rgba(255, 63, 127, 0)");
+        ctx.fillStyle = flame;
         ctx.beginPath();
-        ctx.moveTo(-s * 0.42, s * 0.06);
-        ctx.lineTo(-s * 0.68 - Math.random() * s * 0.12, s * 0.0);
-        ctx.lineTo(-s * 0.42, s * 0.16);
+        ctx.moveTo(-s * 0.08, s * 0.36);
+        ctx.lineTo(0, s * (0.88 + Math.random() * 0.15));
+        ctx.lineTo(s * 0.08, s * 0.36);
         ctx.fill();
       }
 
