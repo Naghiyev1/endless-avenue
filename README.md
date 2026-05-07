@@ -1,6 +1,14 @@
-# Endless Avenue v2
+# Endless Avenue v3
 
 A retro café racer browser game for GitHub Pages.
+
+## What changed in v3
+
+- Rebuilt the motorcycle sprite as a true rear-view arcade bike.
+- Removed the side-view café racer silhouette that looked wrong in a behind-the-bike road game.
+- Added a more natural rider: helmet, jacket, shoulders, arms, gloves, seat, rear tyre, exhausts.
+- Made the player sprite visually richer with gradients, tail light, tyre highlights, and boost flame.
+- Bumped the offline cache to v3.
 
 ## What changed in v2
 
