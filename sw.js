@@ -1,4 +1,4 @@
-const CACHE_NAME = "endless-avenue-v1";
+const CACHE_NAME = "endless-avenue-v2";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
