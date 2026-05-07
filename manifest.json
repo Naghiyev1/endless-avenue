@@ -1,13 +1,13 @@
 {
   "name": "Endless Avenue",
   "short_name": "Avenue",
-  "description": "A retro caf\u00e9 racer ride through an endless New York-inspired city.",
+  "description": "A responsive retro caf\u00e9 racer ride through an endless New York-inspired city.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#090B1A",
   "theme_color": "#090B1A",
-  "orientation": "landscape",
+  "orientation": "any",
   "icons": [
     {
       "src": "icons/icon-192.png",
