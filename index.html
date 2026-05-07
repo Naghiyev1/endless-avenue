@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#090B1A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Endless Avenue" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="A retro café racer ride through an endless New York-inspired city." />
+
+  <title>Endless Avenue</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <style>
+    :root {
+      --bg: #090b1a;
+      --text: #f8f1dc;
+      --muted: rgba(248, 241, 220, 0.72);
+      --accent: #20aae3;
+      --hot: #ff3f7f;
+      --gold: #ffd36a;
+      --danger: #ff4f3f;
+      --panel: rgba(7, 9, 24, 0.72);
+      --border: rgba(255, 255, 255, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      touch-action: none;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top left, rgba(32, 170, 227, 0.22), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(255, 63, 127, 0.18), transparent 32%),
+        #090b1a;
+    }
+
+    #gameWrap {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: #090b1a;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      background: #090b1a;
+    }
+
+    .hud {
+      position: absolute;
+      inset: env(safe-area-inset-top) 0 auto 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .hudPanel {
+      min-width: 120px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    .hudLabel {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 4px;
+    }
+
+    .hudValue {
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .district {
+      text-align: right;
+      max-width: 210px;
+    }
+
+    .district .hudValue {
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--gold);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at center, rgba(32, 170, 227, 0.08), transparent 38%),
+        linear-gradient(180deg, rgba(9, 11, 26, 0.34), rgba(9, 11, 26, 0.78));
+      z-index: 7;
+    }
+
+    .screen {
+      width: min(720px, 100%);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: clamp(24px, 6vw, 44px);
+      background: rgba(7, 9, 24, 0.82);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.46);
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      color: var(--accent);
+      border: 1px solid rgba(32, 170, 227, 0.32);
+      background: rgba(32, 170, 227, 0.09);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(44px, 12vw, 92px);
+      line-height: 0.88;
+      letter-spacing: -0.08em;
+      text-transform: uppercase;
+      text-shadow: 0 0 22px rgba(32, 170, 227, 0.28);
+    }
+
+    .subtitle {
+      max-width: 560px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: clamp(15px, 2.4vw, 18px);
+      line-height: 1.55;
+    }
+
+    .buttonRow {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 26px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 18px;
+      padding: 15px 18px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 950;
+      cursor: pointer;
+      color: #071018;
+      background: var(--gold);
+      box-shadow: 0 12px 28px rgba(255, 211, 106, 0.22);
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      color: var(--text);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .instructions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 26px auto 0;
+      max-width: 560px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: left;
+    }
+
+    .instruction {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .mobileControls {
+      position: absolute;
+      inset: auto 0 calc(env(safe-area-inset-bottom) + 12px) 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 14px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .touchZone {
+      height: 74px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      color: rgba(248,241,220,0.46);
+      font-size: 13px;
+      font-weight: 900;
+      pointer-events: auto;
+    }
+
+    .boostZone {
+      position: absolute;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom) + 98px);
+      transform: translateX(-50%);
+      width: 116px;
+      height: 52px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,211,106,0.28);
+      background: rgba(255,211,106,0.12);
+      color: rgba(255,211,106,0.82);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 950;
+      z-index: 5;
+      pointer-events: auto;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (min-width: 900px) {
+      .mobileControls,
+      .boostZone {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hud {
+        padding: 10px;
+      }
+
+      .hudPanel {
+        min-width: auto;
+        padding: 9px 10px;
+      }
+
+      .hudValue {
+        font-size: 15px;
+      }
+
+      .district {
+        max-width: 160px;
+      }
+
+      .instructions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="gameWrap">
+    <canvas id="game" width="960" height="540" aria-label="Endless Avenue game canvas"></canvas>
+
+    <div class="hud">
+      <div class="hudPanel">
+        <div class="hudLabel">Distance</div>
+        <div class="hudValue"><span id="distance">0</span> m</div>
+      </div>
+      <div class="hudPanel">
+        <div class="hudLabel">Speed</div>
+        <div class="hudValue"><span id="speed">0</span> mph</div>
+      </div>
+      <div class="hudPanel district">
+        <div class="hudLabel">District</div>
+        <div class="hudValue" id="district">Downtown Dawn</div>
+      </div>
+    </div>
+
+    <div class="mobileControls">
+      <div class="touchZone" id="touchLeft">← LEFT</div>
+      <div class="touchZone" id="touchRight">RIGHT →</div>
+    </div>
+    <div class="boostZone" id="touchBoost">BOOST</div>
+
+    <div class="overlay" id="startOverlay">
+      <div class="screen">
+        <div class="eyebrow">Retro café racer</div>
+        <h1>Endless Avenue</h1>
+        <p class="subtitle">
+          Ride through an endless New York-inspired city. Dodge taxis, chase the green lights,
+          and keep the café racer upright as the city changes around you.
+        </p>
+
+        <div class="buttonRow">
+          <button id="startBtn">Start Ride</button>
+          <button class="secondary" id="soundBtn">Sound: Off</button>
+        </div>
+
+        <div class="instructions">
+          <div class="instruction"><strong>Desktop:</strong><br>← / A and → / D to steer. ↑ / W to accelerate. ↓ / S to brake. Space to boost.</div>
+          <div class="instruction"><strong>Phone:</strong><br>Tap left/right zones to steer. Hold BOOST for a short burst.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="gameOverOverlay">
+      <div class="screen">
+        <div class="eyebrow">Ride ended</div>
+        <h1>Crash</h1>
+        <p class="subtitle">
+          Distance: <strong><span id="finalDistance">0</span> m</strong><br>
+          Best: <strong><span id="bestDistance">0</span> m</strong>
+        </p>
+
+        <div class="buttonRow">
+          <button id="restartBtn">Ride Again</button>
+          <button class="secondary" id="backBtn">Title Screen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const ui = {
+      distance: document.getElementById("distance"),
+      speed: document.getElementById("speed"),
+      district: document.getElementById("district"),
+      startOverlay: document.getElementById("startOverlay"),
+      gameOverOverlay: document.getElementById("gameOverOverlay"),
+      finalDistance: document.getElementById("finalDistance"),
+      bestDistance: document.getElementById("bestDistance"),
+      startBtn: document.getElementById("startBtn"),
+      restartBtn: document.getElementById("restartBtn"),
+      backBtn: document.getElementById("backBtn"),
+      soundBtn: document.getElementById("soundBtn"),
+      touchLeft: document.getElementById("touchLeft"),
+      touchRight: document.getElementById("touchRight"),
+      touchBoost: document.getElementById("touchBoost")
+    };
+
+    const districts = [
+      {
+        name: "Downtown Dawn",
+        skyTop: "#151E3C",
+        skyBottom: "#E17A58",
+        road: "#232536",
+        shoulder: "#392B3B",
+        lane: "#FFD36A",
+        buildingA: "#18233f",
+        buildingB: "#243455",
+        sign: "#20AAE3",
+        detail: "STEAM"
+      },
+      {
+        name: "Midtown Rush",
+        skyTop: "#101529",
+        skyBottom: "#354C7C",
+        road: "#272936",
+        shoulder: "#393444",
+        lane: "#F7F1DC",
+        buildingA: "#1E294A",
+        buildingB: "#344464",
+        sign: "#FFD36A",
+        detail: "TAXI"
+      },
+      {
+        name: "Times Square Night",
+        skyTop: "#090B1A",
+        skyBottom: "#25143C",
+        road: "#1D1E2C",
+        shoulder: "#2B2140",
+        lane: "#20AAE3",
+        buildingA: "#17172D",
+        buildingB: "#281A45",
+        sign: "#FF3F7F",
+        detail: "NEON"
+      },
+      {
+        name: "Parkside Cruise",
+        skyTop: "#13253A",
+        skyBottom: "#426B66",
+        road: "#252A31",
+        shoulder: "#223B2B",
+        lane: "#F7F1DC",
+        buildingA: "#20352C",
+        buildingB: "#2F573F",
+        sign: "#7EE081",
+        detail: "PARK"
+      },
+      {
+        name: "Brooklyn Bridge Run",
+        skyTop: "#111827",
+        skyBottom: "#4D6680",
+        road: "#242A34",
+        shoulder: "#2B303A",
+        lane: "#FFD36A",
+        buildingA: "#1A2440",
+        buildingB: "#2F405B",
+        sign: "#F7F1DC",
+        detail: "BRIDGE"
+      },
+      {
+        name: "Rainy SoHo",
+        skyTop: "#0D1324",
+        skyBottom: "#263447",
+        road: "#151B27",
+        shoulder: "#202638",
+        lane: "#20AAE3",
+        buildingA: "#1C2635",
+        buildingB: "#313847",
+        sign: "#FF7A59",
+        detail: "SOHO"
+      },
+      {
+        name: "Queens Expressway",
+        skyTop: "#11131E",
+        skyBottom: "#38404B",
+        road: "#20242D",
+        shoulder: "#30313B",
+        lane: "#FFD36A",
+        buildingA: "#1C2331",
+        buildingB: "#3A3B3F",
+        sign: "#20AAE3",
+        detail: "EXIT"
+      }
+    ];
+
+    const state = {
+      mode: "title",
+      width: 960,
+      height: 540,
+      scale: 1,
+      lastTime: 0,
+      playerX: 0,
+      speed: 0,
+      targetSpeed: 0,
+      maxSpeed: 1,
+      distance: 0,
+      roadCurve: 0,
+      curvePhase: 0,
+      traffic: [],
+      particles: [],
+      roadMarks: [],
+      buildings: [],
+      signs: [],
+      spawnTimer: 0,
+      districtIndex: 0,
+      districtDistance: 0,
+      shake: 0,
+      boost: 1,
+      sound: false,
+      best: Number(localStorage.getItem("endless-avenue-best") || 0)
+    };
+
+    const keys = new Set();
+
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      state.width = canvas.width;
+      state.height = canvas.height;
+      state.scale = dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function resetGame() {
+      state.mode = "playing";
+      state.playerX = 0;
+      state.speed = 0.35;
+      state.distance = 0;
+      state.curvePhase = 0;
+      state.traffic = [];
+      state.particles = [];
+      state.spawnTimer = 0;
+      state.districtIndex = 0;
+      state.districtDistance = 0;
+      state.shake = 0;
+      state.boost = 1;
+      ui.startOverlay.classList.add("hidden");
+      ui.gameOverOverlay.classList.add("hidden");
+      beep(220, 0.08, "square", 0.04);
+    }
+
+    function gameOver() {
+      state.mode = "over";
+      state.shake = 18;
+      const score = Math.floor(state.distance);
+      if (score > state.best) {
+        state.best = score;
+        localStorage.setItem("endless-avenue-best", String(score));
+      }
+      ui.finalDistance.textContent = score;
+      ui.bestDistance.textContent = state.best;
+      ui.gameOverOverlay.classList.remove("hidden");
+      beep(80, 0.2, "sawtooth", 0.08);
+    }
+
+    ui.startBtn.addEventListener("click", resetGame);
+    ui.restartBtn.addEventListener("click", resetGame);
+    ui.backBtn.addEventListener("click", () => {
+      state.mode = "title";
+      ui.gameOverOverlay.classList.add("hidden");
+      ui.startOverlay.classList.remove("hidden");
+    });
+
+    ui.soundBtn.addEventListener("click", () => {
+      state.sound = !state.sound;
+      ui.soundBtn.textContent = state.sound ? "Sound: On" : "Sound: Off";
+      beep(440, 0.08, "square", 0.04);
+    });
+
+    window.addEventListener("keydown", (event) => {
+      keys.add(event.key.toLowerCase());
+      if (["arrowleft", "arrowright", "arrowup", "arrowdown", " "].includes(event.key.toLowerCase())) {
+        event.preventDefault();
+      }
+      if (event.key === "Enter" && state.mode !== "playing") resetGame();
+    });
+
+    window.addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
+
+    const touch = {
+      left: false,
+      right: false,
+      boost: false
+    };
+
+    function bindTouch(element, prop) {
+      const start = (event) => { event.preventDefault(); touch[prop] = true; };
+      const end = (event) => { event.preventDefault(); touch[prop] = false; };
+      element.addEventListener("pointerdown", start);
+      element.addEventListener("pointerup", end);
+      element.addEventListener("pointercancel", end);
+      element.addEventListener("pointerleave", end);
+    }
+
+    bindTouch(ui.touchLeft, "left");
+    bindTouch(ui.touchRight, "right");
+    bindTouch(ui.touchBoost, "boost");
+
+    let audioCtx = null;
+    function beep(freq, duration, type = "square", gainValue = 0.03) {
+      if (!state.sound) return;
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.value = gainValue;
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function currentDistrict() {
+      return districts[state.districtIndex % districts.length];
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function drawSky(d) {
+      const w = state.width;
+      const h = state.height;
+      const grad = ctx.createLinearGradient(0, 0, 0, h * 0.62);
+      grad.addColorStop(0, d.skyTop);
+      grad.addColorStop(1, d.skyBottom);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      for (let i = 0; i < 38; i++) {
+        const x = (i * 193 + Math.floor(state.distance * 0.2)) % w;
+        const y = (i * 47) % Math.floor(h * 0.32);
+        const s = (i % 3) + 1;
+        if (state.districtIndex % 3 === 2) ctx.fillRect(x, y, s, s);
+      }
+
+      const moonX = w * 0.77;
+      const moonY = h * 0.13;
+      ctx.fillStyle = state.districtIndex % 3 === 2 ? "rgba(255, 241, 190, 0.82)" : "rgba(255, 211, 106, 0.28)";
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, h * 0.035, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBuildings(d) {
+      const w = state.width;
+      const h = state.height;
+      const horizon = h * 0.48;
+      const scroll = state.distance * 0.28;
+      const blockW = w / 9;
+
+      for (let layer = 0; layer < 2; layer++) {
+        const yBase = horizon + layer * 26;
+        const color = layer === 0 ? d.buildingA : d.buildingB;
+        ctx.fillStyle = color;
+
+        for (let i = -2; i < 13; i++) {
+          const x = ((i * blockW - scroll * (0.55 + layer * 0.32)) % (w + blockW * 2)) - blockW;
+          const seed = (i * 37 + state.districtIndex * 19 + layer * 11);
+          const bh = h * (0.18 + ((seed % 7) * 0.026)) + layer * 16;
+          const bw = blockW * (0.74 + ((seed % 5) * 0.05));
+          ctx.fillRect(x, yBase - bh, bw, bh);
+
+          ctx.fillStyle = (seed % 4 === 0) ? d.sign : "rgba(255, 241, 190, 0.42)";
+          const rows = Math.floor(bh / 22);
+          for (let r = 1; r < rows; r++) {
+            for (let c = 0; c < 3; c++) {
+              if ((r + c + seed) % 3 !== 0) {
+                ctx.fillRect(x + 12 + c * 22, yBase - bh + r * 18, 7, 5);
+              }
+            }
+          }
+
+          if (layer === 0 && seed % 4 === 0) {
+            ctx.fillStyle = d.sign;
+            ctx.fillRect(x + bw * 0.12, yBase - bh + 18, bw * 0.62, 22);
+            ctx.fillStyle = "#071018";
+            ctx.font = `${Math.max(10, h * 0.018)}px monospace`;
+            ctx.fillText(d.detail, x + bw * 0.15, yBase - bh + 34);
+          }
+
+          ctx.fillStyle = color;
+        }
+      }
+
+      if (d.detail === "BRIDGE") {
+        drawBridge(horizon, d);
+      }
+
+      if (d.detail === "PARK") {
+        drawTrees(horizon);
+      }
+    }
+
+    function drawBridge(horizon, d) {
+      const w = state.width;
+      const h = state.height;
+      ctx.strokeStyle = "rgba(248,241,220,0.34)";
+      ctx.lineWidth = Math.max(2, h * 0.004);
+      for (let i = -1; i < 6; i++) {
+        const x = (i * w * 0.25 - (state.distance * 0.45) % (w * 0.25));
+        ctx.beginPath();
+        ctx.moveTo(x, horizon - h * 0.22);
+        ctx.lineTo(x + w * 0.08, horizon + h * 0.02);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, horizon - h * 0.22);
+        ctx.lineTo(x - w * 0.08, horizon + h * 0.02);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(248,241,220,0.42)";
+      ctx.beginPath();
+      ctx.moveTo(0, horizon - h * 0.14);
+      ctx.quadraticCurveTo(w * 0.5, horizon - h * 0.22, w, horizon - h * 0.14);
+      ctx.stroke();
+    }
+
+    function drawTrees(horizon) {
+      const w = state.width;
+      const h = state.height;
+      const scroll = (state.distance * 0.7) % 120;
+      for (let i = -1; i < 12; i++) {
+        const x = i * 120 - scroll;
+        const y = horizon + h * 0.02 + (i % 2) * 16;
+        ctx.fillStyle = "#17321E";
+        ctx.fillRect(x + 20, y, 12, 54);
+        ctx.fillStyle = "#2F7D3B";
+        ctx.beginPath();
+        ctx.arc(x + 26, y - 8, 30, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function roadMetrics(y) {
+      const h = state.height;
+      const w = state.width;
+      const horizon = h * 0.48;
+      const p = clamp((y - horizon) / (h - horizon), 0, 1);
+      const ease = p * p;
+      const center = w * 0.5 + state.roadCurve * (1 - p) * w * 0.18 + Math.sin(state.curvePhase + p * 4) * w * 0.025 * (1 - p);
+      const roadW = lerp(w * 0.09, w * 1.05, ease);
+      return { p, center, roadW };
+    }
+
+    function drawRoad(d) {
+      const w = state.width;
+      const h = state.height;
+      const horizon = h * 0.48;
+      const bottom = h;
+
+      const top = roadMetrics(horizon);
+      const bot = roadMetrics(bottom);
+
+      ctx.fillStyle = d.shoulder;
+      ctx.beginPath();
+      ctx.moveTo(0, bottom);
+      ctx.lineTo(w, bottom);
+      ctx.lineTo(top.center + top.roadW * 0.72, horizon);
+      ctx.lineTo(top.center - top.roadW * 0.72, horizon);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = d.road;
+      ctx.beginPath();
+      ctx.moveTo(bot.center - bot.roadW * 0.5, bottom);
+      ctx.lineTo(bot.center + bot.roadW * 0.5, bottom);
+      ctx.lineTo(top.center + top.roadW * 0.5, horizon);
+      ctx.lineTo(top.center - top.roadW * 0.5, horizon);
+      ctx.closePath();
+      ctx.fill();
+
+      // Road edge glow
+      ctx.strokeStyle = "rgba(255,255,255,0.26)";
+      ctx.lineWidth = Math.max(2, h * 0.004);
+      ctx.beginPath();
+      ctx.moveTo(bot.center - bot.roadW * 0.5, bottom);
+      ctx.lineTo(top.center - top.roadW * 0.5, horizon);
+      ctx.moveTo(bot.center + bot.roadW * 0.5, bottom);
+      ctx.lineTo(top.center + top.roadW * 0.5, horizon);
+      ctx.stroke();
+
+      // Lane markers
+      const roadScroll = (state.distance * 5.2) % 1;
+      for (let i = 0; i < 38; i++) {
+        const p1 = (i / 38 + roadScroll) % 1;
+        const p2 = clamp(p1 + 0.018 + p1 * 0.04, 0, 1);
+        const y1 = horizon + p1 * (h - horizon);
+        const y2 = horizon + p2 * (h - horizon);
+        if (p1 < 0.02 || p1 > 0.98) continue;
+
+        const m1 = roadMetrics(y1);
+        const m2 = roadMetrics(y2);
+
+        [-1/6, 1/6].forEach(offset => {
+          const x1 = m1.center + m1.roadW * offset;
+          const x2 = m2.center + m2.roadW * offset;
+          const lw = Math.max(2, m2.roadW * 0.012);
+          ctx.strokeStyle = d.lane;
+          ctx.lineWidth = lw;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        });
+      }
+
+      // Wet reflections for Rainy SoHo
+      if (d.detail === "SOHO") {
+        ctx.fillStyle = "rgba(32,170,227,0.08)";
+        for (let i = 0; i < 18; i++) {
+          const y = horizon + ((i * 97 + state.distance * 18) % (h - horizon));
+          const m = roadMetrics(y);
+          ctx.fillRect(m.center - m.roadW * 0.16, y, m.roadW * 0.32, 2);
+        }
+      }
+    }
+
+    function drawBike() {
+      const w = state.width;
+      const h = state.height;
+      const x = w * 0.5 + state.playerX * w * 0.28;
+      const y = h * 0.82;
+      const s = h * 0.16;
+      const lean = state.playerX * 0.16;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(lean);
+
+      // shadow
+      ctx.fillStyle = "rgba(0,0,0,0.38)";
+      ctx.beginPath();
+      ctx.ellipse(0, s * 0.28, s * 0.72, s * 0.18, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // wheels
+      ctx.fillStyle = "#080A12";
+      ctx.beginPath();
+      ctx.ellipse(-s * 0.28, s * 0.2, s * 0.18, s * 0.22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(s * 0.28, s * 0.2, s * 0.18, s * 0.22, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#F7F1DC";
+      ctx.lineWidth = Math.max(2, s * 0.025);
+      ctx.beginPath();
+      ctx.arc(-s * 0.28, s * 0.2, s * 0.13, 0, Math.PI * 2);
+      ctx.arc(s * 0.28, s * 0.2, s * 0.13, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // frame
+      ctx.strokeStyle = "#C7CAD4";
+      ctx.lineWidth = s * 0.055;
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.36, s * 0.08);
+      ctx.lineTo(-s * 0.05, -s * 0.06);
+      ctx.lineTo(s * 0.33, s * 0.08);
+      ctx.moveTo(-s * 0.05, -s * 0.06);
+      ctx.lineTo(0, s * 0.18);
+      ctx.stroke();
+
+      // tank
+      ctx.fillStyle = "#B02A2A";
+      ctx.beginPath();
+      ctx.roundRect(-s * 0.16, -s * 0.18, s * 0.42, s * 0.22, s * 0.08);
+      ctx.fill();
+
+      ctx.fillStyle = "#FFD36A";
+      ctx.fillRect(-s * 0.05, -s * 0.15, s * 0.18, s * 0.045);
+
+      // rider
+      ctx.fillStyle = "#111827";
+      ctx.beginPath();
+      ctx.roundRect(-s * 0.06, -s * 0.45, s * 0.16, s * 0.34, s * 0.08);
+      ctx.fill();
+
+      ctx.fillStyle = "#F7CDA0";
+      ctx.beginPath();
+      ctx.arc(s * 0.03, -s * 0.54, s * 0.08, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#0A0B12";
+      ctx.beginPath();
+      ctx.arc(s * 0.03, -s * 0.57, s * 0.09, Math.PI, Math.PI * 2);
+      ctx.fill();
+
+      // headlight
+      ctx.fillStyle = "rgba(255, 230, 142, 0.88)";
+      ctx.beginPath();
+      ctx.arc(s * 0.39, s * 0.02, s * 0.055, 0, Math.PI * 2);
+      ctx.fill();
+
+      // boost flame
+      if (keys.has(" ") || touch.boost) {
+        ctx.fillStyle = "rgba(255, 94, 58, 0.86)";
+        ctx.beginPath();
+        ctx.moveTo(-s * 0.42, s * 0.06);
+        ctx.lineTo(-s * 0.68 - Math.random() * s * 0.12, s * 0.0);
+        ctx.lineTo(-s * 0.42, s * 0.16);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function spawnTraffic() {
+      const lane = [-0.34, 0, 0.34][Math.floor(Math.random() * 3)];
+      const typeRoll = Math.random();
+      const type = typeRoll < 0.62 ? "taxi" : typeRoll < 0.82 ? "van" : "bus";
+      state.traffic.push({
+        lane,
+        z: 1.02,
+        speed: rand(0.35, 0.72),
+        type,
+        wobble: rand(0, Math.PI * 2)
+      });
+    }
+
+    function updateTraffic(dt) {
+      state.spawnTimer -= dt * (0.8 + state.speed * 1.4);
+      if (state.spawnTimer <= 0) {
+        spawnTraffic();
+        state.spawnTimer = rand(0.55, 1.2) / (0.75 + state.speed * 0.9);
+      }
+
+      state.traffic.forEach(car => {
+        car.z -= dt * (0.16 + state.speed * 0.34 - car.speed * 0.055);
+        car.wobble += dt * 3;
+      });
+
+      state.traffic = state.traffic.filter(car => car.z > -0.12);
+
+      for (const car of state.traffic) {
+        if (car.z < 0.16 && car.z > 0.02) {
+          const playerLane = state.playerX;
+          if (Math.abs(playerLane - car.lane) < 0.19) {
+            gameOver();
+            return;
+          } else if (Math.abs(playerLane - car.lane) < 0.29 && Math.random() < 0.08) {
+            beep(740, 0.04, "square", 0.025);
+          }
+        }
+      }
+    }
+
+    function drawTraffic(d) {
+      const h = state.height;
+      const horizon = h * 0.48;
+
+      [...state.traffic].sort((a, b) => b.z - a.z).forEach(car => {
+        const p = clamp(1 - car.z, 0, 1);
+        const y = horizon + p * (h - horizon);
+        const m = roadMetrics(y);
+        const x = m.center + m.roadW * car.lane + Math.sin(car.wobble) * m.roadW * 0.005;
+        const s = m.roadW * (car.type === "bus" ? 0.12 : car.type === "van" ? 0.095 : 0.078);
+        const carH = s * (car.type === "bus" ? 0.95 : 0.78);
+
+        ctx.save();
+        ctx.translate(x, y);
+
+        // shadow
+        ctx.fillStyle = "rgba(0,0,0,0.34)";
+        ctx.beginPath();
+        ctx.ellipse(0, carH * 0.38, s * 0.65, carH * 0.18, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (car.type === "taxi") ctx.fillStyle = "#F6C33B";
+        else if (car.type === "bus") ctx.fillStyle = "#B22D2D";
+        else ctx.fillStyle = "#D8DEE9";
+
+        ctx.beginPath();
+        ctx.roundRect(-s * 0.5, -carH * 0.5, s, carH, Math.max(3, s * 0.12));
+        ctx.fill();
+
+        ctx.fillStyle = "rgba(9,11,26,0.82)";
+        ctx.fillRect(-s * 0.36, -carH * 0.35, s * 0.72, carH * 0.22);
+
+        if (car.type === "taxi") {
+          ctx.fillStyle = "#090B1A";
+          ctx.fillRect(-s * 0.20, -carH * 0.62, s * 0.4, carH * 0.10);
+        }
+
+        ctx.fillStyle = "rgba(255, 241, 220, 0.92)";
+        ctx.fillRect(-s * 0.38, carH * 0.22, s * 0.18, carH * 0.06);
+        ctx.fillRect(s * 0.20, carH * 0.22, s * 0.18, carH * 0.06);
+
+        ctx.restore();
+      });
+    }
+
+    function updateGame(dt) {
+      if (state.mode !== "playing") return;
+
+      const left = keys.has("arrowleft") || keys.has("a") || touch.left;
+      const right = keys.has("arrowright") || keys.has("d") || touch.right;
+      const accel = keys.has("arrowup") || keys.has("w");
+      const brake = keys.has("arrowdown") || keys.has("s");
+      const boosting = (keys.has(" ") || touch.boost) && state.boost > 0.02;
+
+      let steer = 0;
+      if (left) steer -= 1;
+      if (right) steer += 1;
+
+      const speedGoal = accel ? 1.06 : 0.72;
+      state.speed = lerp(state.speed, speedGoal, dt * 1.7);
+      if (brake) state.speed = lerp(state.speed, 0.33, dt * 3.2);
+
+      if (boosting) {
+        state.speed = lerp(state.speed, 1.34, dt * 3.4);
+        state.boost = Math.max(0, state.boost - dt * 0.22);
+      } else {
+        state.boost = Math.min(1, state.boost + dt * 0.06);
+      }
+
+      state.playerX += steer * dt * (1.15 + state.speed * 0.35);
+      state.playerX -= state.roadCurve * dt * 0.21 * state.speed;
+      state.playerX = clamp(state.playerX, -0.58, 0.58);
+
+      if (Math.abs(state.playerX) > 0.54) {
+        state.speed = lerp(state.speed, 0.4, dt * 2.2);
+        state.shake = Math.max(state.shake, 2);
+      }
+
+      state.distance += dt * state.speed * 74;
+      state.districtDistance += dt * state.speed * 74;
+      state.curvePhase += dt * (0.55 + state.speed * 0.22);
+      state.roadCurve = Math.sin(state.distance * 0.0024) * 0.9 + Math.sin(state.distance * 0.0009) * 0.6;
+
+      if (state.districtDistance > 900) {
+        state.districtDistance = 0;
+        state.districtIndex = (state.districtIndex + 1) % districts.length;
+        beep(520, 0.08, "triangle", 0.04);
+      }
+
+      updateTraffic(dt);
+
+      if (state.mode === "playing") {
+        ui.distance.textContent = Math.floor(state.distance);
+        ui.speed.textContent = Math.floor(34 + state.speed * 82);
+        ui.district.textContent = currentDistrict().name;
+      }
+
+      state.shake = Math.max(0, state.shake - dt * 16);
+    }
+
+    function drawHudExtras() {
+      const w = state.width;
+      const h = state.height;
+      // boost bar
+      const x = w * 0.5 - 90 * state.scale;
+      const y = h - 24 * state.scale;
+      const bw = 180 * state.scale;
+      const bh = 6 * state.scale;
+      ctx.fillStyle = "rgba(255,255,255,0.16)";
+      ctx.fillRect(x, y, bw, bh);
+      ctx.fillStyle = "#FFD36A";
+      ctx.fillRect(x, y, bw * state.boost, bh);
+    }
+
+    function render() {
+      const d = currentDistrict();
+      ctx.save();
+
+      if (state.shake > 0) {
+        ctx.translate(rand(-state.shake, state.shake) * state.scale, rand(-state.shake, state.shake) * state.scale);
+      }
+
+      drawSky(d);
+      drawBuildings(d);
+      drawRoad(d);
+      drawTraffic(d);
+      drawBike();
+      drawHudExtras();
+
+      if (state.mode === "title") {
+        // draw a slower demo road feeling behind overlay
+        state.distance += 0.28;
+        state.curvePhase += 0.006;
+        state.roadCurve = Math.sin(state.distance * 0.0024) * 0.8;
+      }
+
+      ctx.restore();
+    }
+
+    function loop(time) {
+      const dt = Math.min(0.033, (time - state.lastTime) / 1000 || 0.016);
+      state.lastTime = time;
+      updateGame(dt);
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
