@@ -1,48 +1,34 @@
-# Endless Avenue v3
+# Endless Avenue v4
 
-A retro café racer browser game for GitHub Pages.
+A responsive retro café racer browser game for GitHub Pages.
 
-## What changed in v3
+## What changed in v4
 
-- Rebuilt the motorcycle sprite as a true rear-view arcade bike.
-- Removed the side-view café racer silhouette that looked wrong in a behind-the-bike road game.
-- Added a more natural rider: helmet, jacket, shoulders, arms, gloves, seat, rear tyre, exhausts.
-- Made the player sprite visually richer with gradients, tail light, tyre highlights, and boost flame.
-- Bumped the offline cache to v3.
-
-## What changed in v2
-
-- Rebuilt collision detection using actual on-screen rectangles.
-- Fixed false crashes when steering left/right on an empty road.
-- Made the collision box smaller than the visual bike, so it feels fair.
-- Redrew the bike from a rear-view perspective so it no longer looks sideways.
-- Redrew the rider to look more natural.
-- Added debug collision boxes: press `B` while playing.
-- Bumped the offline cache to v2.
-
-## What it is
-
-Endless Avenue is a lightweight pseudo-3D arcade motorcycle game. You ride through an endless New York-inspired city with changing districts, traffic, speed, distance scoring, and local high score storage.
-
-## Files
-
-- `index.html` — the full game
-- `manifest.json` — makes it installable on phones
-- `sw.js` — enables offline loading after the first visit
-- `icons/` — app icons
+- Rebuilt the layout so the game adapts to different screen sizes.
+- Portrait mode now has a protected playable area, so the bike does not become absurdly huge.
+- Mobile controls stay inside the visible screen instead of falling below the fold.
+- The canvas uses the full viewport, but the game logic reserves space for controls.
+- Bike size is calculated from the playable area, not raw screen height.
+- Manifest orientation changed to `any`, so phones are not forced into a broken layout.
+- HUD and overlays are more compact on portrait screens.
+- Traffic cars have slightly better visual depth with gradients.
+- Cache bumped to v4.
 
 ## Deploy on GitHub Pages
 
-1. Create a new GitHub repository.
-2. Upload all files and folders in this ZIP.
-3. Go to Settings → Pages.
-4. Choose Deploy from a branch.
-5. Choose `main` and `/root`.
-6. Save.
+1. Upload/replace all files in your GitHub repository.
+2. Go to Settings → Pages if this is a new repo.
+3. Choose Deploy from a branch.
+4. Choose `main` and `/root`.
+5. Save.
 
-Your game will be live at:
+## Important cache note
 
-`https://YOURUSERNAME.github.io/YOUR-REPO-NAME/`
+Because this is a PWA, your phone may keep an older cached version.
+
+After uploading v4:
+- Open the game in a browser tab and refresh twice.
+- If the home-screen app still shows the old version, delete the icon and add it again.
 
 ## Controls
 
@@ -52,15 +38,8 @@ Desktop:
 - Arrow Up / W = accelerate
 - Arrow Down / S = brake
 - Space = boost
+- B = show collision boxes
 
 Mobile:
 - Tap/hold left and right zones to steer
 - Hold BOOST for a short burst
-
-## Add to phone
-
-iPhone:
-Open the live page in Safari → Share → Add to Home Screen.
-
-Android:
-Open the live page in Chrome → menu → Add to Home screen or Install app.
