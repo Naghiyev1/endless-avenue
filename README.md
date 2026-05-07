@@ -1,6 +1,16 @@
-# Endless Avenue
+# Endless Avenue v2
 
 A retro café racer browser game for GitHub Pages.
+
+## What changed in v2
+
+- Rebuilt collision detection using actual on-screen rectangles.
+- Fixed false crashes when steering left/right on an empty road.
+- Made the collision box smaller than the visual bike, so it feels fair.
+- Redrew the bike from a rear-view perspective so it no longer looks sideways.
+- Redrew the rider to look more natural.
+- Added debug collision boxes: press `B` while playing.
+- Bumped the offline cache to v2.
 
 ## What it is
 
